@@ -4,7 +4,7 @@ import { TransactionTypes } from "@prisma/client";
 
 export default class CreateTransactionController {
     constructor(readonly server: Elysia, readonly useCase: CreateTransaction) {
-        server.post('/wallets', async ({ body }) => {
+        server.post('/transactions', async ({ body }) => {
             const { amount, type, walletId } = body as any;
             return await useCase.execute({ amount, type, walletId });
         }, {
