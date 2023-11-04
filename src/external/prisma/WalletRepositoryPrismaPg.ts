@@ -49,28 +49,6 @@ export default class WalletRepositoryPrismaPg implements WalletRepository {
         return wallet;
     }
 
-    /**
-     * @deprecated Remove after refactor
-     * @todo Refactor this method and use Transaction instead.
-     */
-    async updateBalance(userId: number, amount: number, transactionType: number): Promise<Wallet> {
-        const wallet = await this.findByUserId(userId);
-
-        if (!wallet) {
-            throw new CustomError(404, "Wallet not found!");
-        }
-
-        const newBalance = Number(wallet.balance) + amount;
-
-        const updatedWallet = this.prisma.wallet.update({
-            where: { id: wallet.id }, include: { user: true, transactions: true }, data: {
-                balance: new Prisma.Decimal(newBalance)
-            }
-        });
-
-        return updatedWallet;
-    }
-
     async delete(userId: number): Promise<void> {
         const wallet = await this.findByUserId(userId);
 
