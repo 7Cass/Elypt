@@ -1,3 +1,3 @@
 export default interface UseCase<I, O> {
-    execute(input: I): Promise<O>;
+    execute(data: I): Promise<O>;
 }

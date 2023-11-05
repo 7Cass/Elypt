@@ -31,10 +31,21 @@ export default class CreateTransaction implements UseCase<Input, Transaction> {
             throw new CustomError(404, "Wallet not found.");
         }
 
-        return await this.repository.create({
+        // Criar transaction
+        const transaction = await this.repository.create({
             amount: new Prisma.Decimal(amount),
             type
         }, walletId);
+
+        // @TODO: 
+        // REFATORAR - 
+        // BALANCE DEVE IR PRA updateBalance()
+        // La deve ser feita a logica dos tipos
+        const newBalance = Number(walletExists.balance) + amount;
+
+        await this.walletRepository.updateBalance(newBalance, walletExists.id);
+
+        return transaction;
     }
 
 }

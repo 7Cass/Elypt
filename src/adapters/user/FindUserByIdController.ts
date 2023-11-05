@@ -1,15 +1,21 @@
 import Elysia, { t } from "elysia";
 import FindUserById from "../../core/user/service/FindUserById";
+import authMiddleware from "../middlewares/AuthMiddleware";
 
 export default class FindUserByIdController {
-    constructor(readonly server: Elysia, readonly useCase: FindUserById) {
+    constructor(readonly server: Elysia<'/api'>, readonly useCase: FindUserById) {
+
         server.get('/users/:id', async ({ params }) => {
             const { id } = params;
-            await useCase.execute({ id });
+            return await useCase.execute({ id: +id });
         }, {
+            beforeHandle: [authMiddleware],
             params: t.Object({
-                id: t.Integer()
-            })
+                id: t.String()
+            }),
+            detail: {
+                tags: ['App']
+            }
         });
     }
 }

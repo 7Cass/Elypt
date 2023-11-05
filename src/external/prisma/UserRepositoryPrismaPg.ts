@@ -18,6 +18,7 @@ export default class UserRepositoryPrismaPg implements UserRepository {
             }
         });
     }
+
     async findAll(): Promise<User[]> {
         return this.prisma.user.findMany();
     }

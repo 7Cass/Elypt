@@ -11,16 +11,12 @@ export default class WalletRepositoryPrismaPg implements WalletRepository {
     }
 
     async create(walletData: Partial<Wallet>): Promise<Wallet> {
-        const { balance, userId } = walletData;
-
-        if (!balance || !userId) {
-            throw new CustomError(400, "Missing either balance or userId fields.");
-        }
+        const { userId } = walletData;
 
         return await this.prisma.wallet.create({
             data: {
-                balance: new Prisma.Decimal(balance || 0),
-                userId
+                balance: new Prisma.Decimal(0),
+                userId: userId!
             },
             include: { user: true, transactions: true }
         });
@@ -49,6 +45,26 @@ export default class WalletRepositoryPrismaPg implements WalletRepository {
         return wallet;
     }
 
+    async updateBalance(newBalance: number, walletId: number): Promise<Wallet> {
+        return await this.prisma.wallet.update({
+            where: {
+                id: walletId
+            },
+            data: {
+                balance: new Prisma.Decimal(newBalance)
+            },
+            include: {
+                user: true,
+                transactions: true
+            }
+        });
+    }
+
+    /**
+     * @todo Refatorar, o repositorio so deve fazer operacoes no banco. 
+     * Remover o CustomError e o findByUserId().
+     * Apenas deletar a wallet.
+     */
     async delete(userId: number): Promise<void> {
         const wallet = await this.findByUserId(userId);
 

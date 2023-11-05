@@ -1,3 +1,4 @@
+import { hash } from "bcryptjs";
 import CustomError from "../../../adapters/errors/CustomError";
 import UseCase from "../../shared/UseCase";
 import UserRepository from "./UserRepository";
@@ -20,6 +21,8 @@ export default class CreateUser implements UseCase<Input, void> {
             throw new CustomError(409, "User already exists!");
         }
 
-        await this.repository.create({ name, email, password });
+        const hashedPassword = await hash(password, 12);
+
+        await this.repository.create({ name, email, password: hashedPassword });
     }
 }

@@ -4,6 +4,7 @@ import UserRepository from "../../user/service/UserRepository";
 import WalletRepository from "./WalletRepository";
 import Wallet from "../model/Wallet";
 import CustomError from "../../../adapters/errors/CustomError";
+import TransactionRepository from "../../transaction/service/TransactionRepository";
 
 type Input = {
     balance: number,
@@ -13,7 +14,8 @@ type Input = {
 export default class CreateWallet implements UseCase<Input, Wallet> {
     constructor(
         private readonly repository: WalletRepository,
-        private readonly userRepository: UserRepository
+        private readonly userRepository: UserRepository,
+        private readonly transactionRepository: TransactionRepository
     ) { }
 
     async execute(data: Input): Promise<Wallet> {
@@ -31,9 +33,17 @@ export default class CreateWallet implements UseCase<Input, Wallet> {
             throw new CustomError(409, "User already has a wallet!");
         }
 
-        return await this.repository.create({
-            balance: new Prisma.Decimal(balance || 0),
+        const wallet = await this.repository.create({
             userId
         });
+
+        // Create transaction
+        await this.transactionRepository.create({
+            amount: new Prisma.Decimal(balance),
+            walletId: wallet.id,
+            type: 'BALANCE'
+        }, wallet.id);
+
+        return await this.repository.updateBalance(balance, wallet.id);
     }
 }
