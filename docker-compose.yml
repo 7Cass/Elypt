@@ -1,0 +1,35 @@
+# docker-compose.yml
+version: '3.9'
+
+services:
+  app:
+    container_name: elypt-api
+    stdin_open: true
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: "oven/bun"
+    command: "/bin/sh -c 'bun install && bunx prisma migrate deploy && bun run --watch src/index.ts'"
+    ports:
+      - 3000:3000
+    volumes: ["./:/home/bun/app"]
+    env_file:
+      - .env.local
+    depends_on:
+      - postgres
+    restart: always
+
+  postgres:
+    container_name: postgres
+    image: postgres:latest
+    env_file:
+      - .env.local
+    ports:
+      - 5432:5432
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    restart: unless-stopped
+
+volumes:
+  pgdata:
+  
